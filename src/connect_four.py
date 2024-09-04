@@ -14,14 +14,13 @@ parser = evaluation_parser(description="Load a model and play a self-game")
 
 args = vars(parser.parse_args())
 
-output_suffix = args["output_suffix"]
+input_file = args["input_file"]
 
 # load saved model
 net = ConnectFourNet()
-net.load_state_dict(
-    torch.load(f"{root_dir}/output/trained_agent_weights.pth", weights_only=True)
-)
+net.load_state_dict(torch.load(input_file, weights_only=True))
 trained_agent = PPO(net)
+print(f"Loaded model from {input_file}")
 
 # Example of playing a game with the trained agent
 env = ConnectFourEnv()

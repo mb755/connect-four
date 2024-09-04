@@ -66,8 +66,9 @@ def train(starting_epoch, num_epochs, input_file):
 
 
 trained_agent = train(starting_epoch, epochs, input_file)
+output_filename = f"{root_dir}/output/trained_agent{output_suffix}.pth"
 torch.save(
     trained_agent.net.state_dict(),
-    f"{root_dir}/output/trained_agent_weights{output_suffix}.pth",
+    output_filename,
 )
-print("Model weights saved as trained_agent_weights.pth")
+print(f"Model weights saved as {output_filename}")
