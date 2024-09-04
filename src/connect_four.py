@@ -2,8 +2,19 @@ import os
 import torch
 from utils.environment import ConnectFourEnv
 from utils.models import ConnectFourNet, PPO
+from utils.config_parser import evaluation_parser
 
 root_dir = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
+
+###########################################################
+# parse command line arguments
+###########################################################
+
+parser = evaluation_parser(description="Load a model and play a self-game")
+
+args = vars(parser.parse_args())
+
+output_suffix = args["output_suffix"]
 
 # load saved model
 net = ConnectFourNet()

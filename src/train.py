@@ -2,16 +2,39 @@ import torch
 import os
 from utils.environment import ConnectFourEnv
 from utils.models import ConnectFourNet, PPO
+from utils.config_parser import training_parser
+from tqdm import tqdm
 
 root_dir = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
 
+###########################################################
+# parse command line arguments
+###########################################################
 
-def train(num_episodes=300, max_steps=100):
+parser = training_parser(description="Train a simple RL model for connect-four")
+
+args = vars(parser.parse_args())
+
+output_suffix = args["output_suffix"]
+epochs = args["epochs"]
+if not args["input_file"]:
+    input_file = None
+else:
+    input_file = args["input_file"]
+starting_epoch = args["starting_epoch"]
+
+max_steps = 42
+
+
+def train(starting_epoch, num_epochs, input_file):
     env = ConnectFourEnv()
     net = ConnectFourNet()
+    if input_file:
+        net.load_state_dict(torch.load(input_file, weights_only=True))
+
     agent = PPO(net)
 
-    for episode in range(num_episodes):
+    for epoch in tqdm(range(starting_epoch, starting_epoch + num_epochs)):
         state = env.reset()
         done = False
         episode_reward = 0
@@ -36,14 +59,15 @@ def train(num_episodes=300, max_steps=100):
         # Update the agent
         agent.update(states, actions, log_probs, rewards, dones, next_state)
 
-        if episode % 100 == 0:
-            print(f"Episode {episode}, Reward: {episode_reward}")
+        if epoch % 100 == 0:
+            tqdm.write(f"Epoch {epoch}, Reward: {episode_reward}")
 
     return agent
 
 
-trained_agent = train()
+trained_agent = train(starting_epoch, epochs, input_file)
 torch.save(
-    trained_agent.net.state_dict(), f"{root_dir}/output/trained_agent_weights.pth"
+    trained_agent.net.state_dict(),
+    f"{root_dir}/output/trained_agent_weights{output_suffix}.pth",
 )
 print("Model weights saved as trained_agent_weights.pth")
